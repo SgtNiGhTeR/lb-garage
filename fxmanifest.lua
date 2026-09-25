@@ -2,7 +2,7 @@ fx_version "cerulean"
 game "gta5"
 lua54 "yes"
 
-author "Hannover RP"
+author "SgtNiGhTeR"
 description "Garage / Fuhrpark app for LB Phone (JG Advanced Garages)"
 version "1.1.0"
 
