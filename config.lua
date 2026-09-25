@@ -10,7 +10,7 @@ Config.Locale = "de"
 Config.AppName = "Garage"
 Config.Description = "Sieh, wo deine Fahrzeuge stehen, markiere Favoriten und prüfe den Abschlepphof."
 Config.DescriptionEn = "See where your vehicles are parked, mark favorites and check the impound lot."
-Config.Developer = "Hannover RP"
+Config.Developer = "SgtNiGhTeR"
 
 -- Resource that provides the garages (its config is read to get garage and impound locations)
 Config.GarageResource = "jg-advancedgarages"
