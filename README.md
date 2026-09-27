@@ -2,7 +2,7 @@
 
 **Deutsch** | [English](#english)
 
-Garagen-App für das **LB Phone**, gebaut für **JG Advanced Garages** (ESX Legacy). Die App ist keine Standard-App:
+Garagen-App für das **LB Phone**, gebaut für **JG Advanced Garages** (ESX Legacy oder Qbox). Die App ist keine Standard-App:
 Spieler laden sie im Appstore des Handys herunter.
 
 Die App zeigt alle eigenen Fahrzeuge, ihren Zustand (in der Garage, ausgeparkt, im Abschlepphof), den Standort und
@@ -11,11 +11,11 @@ Wegpunkt zur Garage oder zum Abschlepphof. Ausparken geht bewusst nicht über di
 
 ## Voraussetzungen
 
-- ESX Legacy (`es_extended`)
+- ESX Legacy (`es_extended`) **oder** Qbox (`qbx_core`) – wird automatisch erkannt
 - `oxmysql`
 - `ox_lib`
 - `lb-phone`
-- `jg-advancedgarages` (Datenbank-Spalten von `owned_vehicles` und die Garagen-Config)
+- `jg-advancedgarages` (Datenbank-Spalten in `owned_vehicles` bzw. `player_vehicles` und die Garagen-Config)
 
 ## Installation
 
@@ -42,7 +42,8 @@ Wegpunkt zur Garage oder zum Abschlepphof. Ausparken geht bewusst nicht über di
 | `Config.Description` / `Config.DescriptionEn` | Beschreibung im Appstore (deutsch / englisch) |
 | `Config.Identifier` | Interne Kennung der App, nach der Installation nicht mehr ändern |
 | `Config.GarageResource` | Ressource mit den Garagen (Standard: `jg-advancedgarages`) |
-| `Config.VehiclesTable` | Tabelle mit den Spielerfahrzeugen (Standard: `owned_vehicles`) |
+| `Config.Framework` | `auto` (erkennt `qbx_core` oder `es_extended`), `esx` oder `qbx` |
+| `Config.VehiclesTable` | Tabelle mit den Spielerfahrzeugen (`nil` = Standard des Frameworks: `owned_vehicles` bei ESX, `player_vehicles` bei Qbox) |
 
 ## Sprachen
 
@@ -56,7 +57,8 @@ Die Übersetzungen liegen in `ui/locales/de.js` und `ui/locales/en.js`. Für ein
 
 ## Woher die Daten kommen
 
-- Fahrzeuge, Zustand, Kraftstoff, Motor und Karosserie kommen aus der Tabelle `owned_vehicles`.
+- Fahrzeuge, Zustand, Kraftstoff, Motor und Karosserie kommen aus `owned_vehicles` (ESX, Besitzer über `owner`) bzw.
+  `player_vehicles` (Qbox, Besitzer über `citizenid`). Unter Qbox kommt der Fahrzeugname aus der Fahrzeugliste von `qbx_core`.
 - Garagen- und Abschlepphof-Standorte liest die App aus `config/config.lua` von `jg-advancedgarages`. Private Garagen
   kommen aus der Tabelle `player_priv_garages`. Für Garagen ohne bekannten Standort bleibt der Wegpunkt-Knopf grau.
 - Favoriten stehen in der eigenen Tabelle `lb_garageapp_favorites`. Nur der Besitzer kann sein Fahrzeug markieren.
@@ -66,8 +68,9 @@ Die Übersetzungen liegen in `ui/locales/de.js` und `ui/locales/en.js`. Für ein
 
 - **App erscheint nicht im Appstore:** Startet `lb-garageapp` nach `lb-phone`? In der Konsole nach
   `Could not add the app` suchen.
-- **Liste ist leer:** Sind die Spalten `in_garage`, `garage_id`, `impound` in `owned_vehicles` vorhanden
-  (Teil der Installation von `jg-advancedgarages`)?
+- **Liste ist leer:** Beim Start prüft die App die Spalten der Fahrzeugtabelle und meldet fehlende in der Konsole
+  (`is missing columns`). Die Spalten `in_garage`, `garage_id`, `impound` usw. kommen aus der SQL-Installation von
+  `jg-advancedgarages` für dein Framework. In der Konsole steht außerdem, welches Framework erkannt wurde.
 - **Abschlepphof zeigt keinen Grund oder keine Kosten:** Diese Angaben stehen nur in `impound_data`, wenn JG sie
   gespeichert hat.
 
@@ -75,7 +78,7 @@ Die Übersetzungen liegen in `ui/locales/de.js` und `ui/locales/en.js`. Für ein
 
 ## English
 
-Garage app for **LB Phone**, made for **JG Advanced Garages** (ESX Legacy). It is not a default app:
+Garage app for **LB Phone**, made for **JG Advanced Garages** (ESX Legacy or Qbox). It is not a default app:
 players download it from the phone's app store.
 
 The app lists your vehicles, their state (in garage, out of garage, impounded), their location and their condition
@@ -84,11 +87,11 @@ Taking vehicles out of the garage is intentionally not part of the app.
 
 ### Requirements
 
-- ESX Legacy (`es_extended`)
+- ESX Legacy (`es_extended`) **or** Qbox (`qbx_core`) – detected automatically
 - `oxmysql`
 - `ox_lib`
 - `lb-phone`
-- `jg-advancedgarages` (database columns of `owned_vehicles` and the garage config)
+- `jg-advancedgarages` (database columns in `owned_vehicles` / `player_vehicles` and the garage config)
 
 ### Installation
 
@@ -115,7 +118,8 @@ Taking vehicles out of the garage is intentionally not part of the app.
 | `Config.Description` / `Config.DescriptionEn` | App store description (German / English) |
 | `Config.Identifier` | Internal app id, do not change it after installing |
 | `Config.GarageResource` | Resource that provides the garages (default: `jg-advancedgarages`) |
-| `Config.VehiclesTable` | Table with the player vehicles (default: `owned_vehicles`) |
+| `Config.Framework` | `auto` (detects `qbx_core` or `es_extended`), `esx` or `qbx` |
+| `Config.VehiclesTable` | Table with the player vehicles (`nil` = framework default: `owned_vehicles` on ESX, `player_vehicles` on Qbox) |
 
 ### Languages
 
@@ -129,7 +133,8 @@ The translations live in `ui/locales/de.js` and `ui/locales/en.js`. To add anoth
 
 ### Where the data comes from
 
-- Vehicles, state, fuel, engine and body come from the `owned_vehicles` table.
+- Vehicles, state, fuel, engine and body come from `owned_vehicles` (ESX, owner via `owner`) or `player_vehicles`
+  (Qbox, owner via `citizenid`). On Qbox the vehicle name comes from the `qbx_core` shared vehicle list.
 - Garage and impound locations are read from `config/config.lua` of `jg-advancedgarages`. Private garages come from
   the `player_priv_garages` table. For garages without a known location the waypoint button stays grey.
 - Favorites are stored in the app's own table `lb_garageapp_favorites`. Only the owner can mark a vehicle.
@@ -139,6 +144,7 @@ The translations live in `ui/locales/de.js` and `ui/locales/en.js`. To add anoth
 
 - **The app does not show up in the app store:** does `lb-garageapp` start after `lb-phone`? Look for
   `Could not add the app` in the console.
-- **The list is empty:** do the columns `in_garage`, `garage_id` and `impound` exist in `owned_vehicles`
-  (part of the `jg-advancedgarages` installation)?
+- **The list is empty:** on start the app checks the vehicles table and prints any missing columns in the console
+  (`is missing columns`). `in_garage`, `garage_id`, `impound` etc. come from the `jg-advancedgarages` SQL install for
+  your framework. The console also shows which framework was detected.
 - **The impound shows no reason or cost:** that information is only available in `impound_data` when JG stored it.

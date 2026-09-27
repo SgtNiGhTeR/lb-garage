@@ -67,7 +67,8 @@ RegisterNUICallback("getVehicles", function(_, cb)
     local vehicles = lib.callback.await("lb-garageapp:getVehicles", false) or {}
 
     for i = 1, #vehicles do
-        vehicles[i].label = getVehicleLabel(vehicles[i].model, vehicles[i].plate)
+        -- Qbox sends a label from its shared vehicle list; otherwise use the GTA label
+        vehicles[i].label = vehicles[i].label or getVehicleLabel(vehicles[i].model, vehicles[i].plate)
     end
 
     cb(vehicles)
