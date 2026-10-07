@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garage</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap");
+
+:root {
+    --bg: #121212;
+    --card: #212121;
+    --card-2: #2b2b2b;
+    --text: #ebebeb;
+    --muted: #b3b3b3;
+    --dim: #6b6b6b;
+    --accent: #ff751a;
+    --accent-soft: rgba(255, 117, 26, 0.16);
+    --green: #5fd39a;
+    --green-soft: rgba(25, 135, 84, 0.22);
+    --red: #ff7b88;
+    --red-soft: rgba(220, 53, 69, 0.22);
+    --orange: #ff9a55;
+    --orange-soft: rgba(255, 117, 26, 0.2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-size: 16px;
+    overflow: hidden;
+    user-select: none;
+}
+
+#app { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; padding-top: 3.2rem; }
+
+.hd { display: flex; align-items: center; gap: 0.7rem; padding: 0.4rem 1rem 0.6rem; }
+.logo { width: 2.3rem; height: 2.3rem; border-radius: 0.65rem; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; flex: none; }
+.logo svg, .ico { width: 1.25rem; height: 1.25rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hd .t { flex: 1; min-width: 0; }
+.hd b { display: block; font-size: 1.2rem; font-weight: 500; line-height: 1.2; }
+.hd small { font-size: 0.75rem; color: var(--muted); }
+.search { margin: 0 1rem 0.6rem; background: var(--card); border-radius: 0.55rem; display: flex; align-items: center; gap: 0.5rem; padding: 0 0.7rem; color: var(--dim); }
+.search input { flex: 1; min-width: 0; height: 2.2rem; background: transparent; border: 0; outline: 0; color: var(--text); font: inherit; font-size: 0.85rem; user-select: text; }
+
+.tabs { display: flex; gap: 0.4rem; padding: 0 1rem 0.7rem; }
+.tab { flex: 1; text-align: center; font-size: 0.78rem; padding: 0.5rem 0; border-radius: 0.55rem; background: var(--card); color: var(--muted); cursor: pointer; border: 1px solid transparent; }
+.tab.on { background: var(--accent-soft); color: var(--accent); border-color: rgba(255, 117, 26, 0.5); }
+
+.list { flex: 1; overflow-y: auto; padding: 0 0.8rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.list::-webkit-scrollbar { width: 0; }
+.car { background: var(--card); border-radius: 0.55rem; padding: 0.65rem; display: flex; gap: 0.65rem; align-items: center; cursor: pointer; border: 1px solid transparent; }
+.car:hover { border-color: rgba(255, 117, 26, 0.5); }
+.thumb { width: 3.4rem; height: 2.7rem; border-radius: 0.4rem; background: var(--card-2); display: flex; align-items: center; justify-content: center; color: #8a8a8a; flex: none; }
+.thumb .ico { width: 1.6rem; height: 1.6rem; }
+.info { flex: 1; min-width: 0; }
+.info b { display: block; font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.info small { display: block; font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.1rem; }
+.chip { display: inline-block; font-size: 0.66rem; padding: 0.12rem 0.5rem; border-radius: 2rem; margin-top: 0.3rem; }
+.chip.garage { background: var(--green-soft); color: var(--green); }
+.chip.outside { background: var(--orange-soft); color: var(--orange); }
+.chip.impound { background: var(--red-soft); color: var(--red); }
+.star { width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; color: var(--dim); flex: none; cursor: pointer; }
+.star.on { color: var(--accent); }
+.star.on .ico { fill: var(--accent); }
+
+.empty { text-align: center; color: var(--dim); font-size: 0.82rem; padding: 3rem 1rem; }
+
+.detail { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; padding-top: 3.2rem; transform: translateX(100%); transition: transform 0.2s ease; z-index: 5; }
+.detail.open { transform: translateX(0); }
+.back { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.9rem; color: var(--muted); font-size: 0.8rem; cursor: pointer; width: fit-content; }
+.dscroll { flex: 1; overflow-y: auto; padding: 0.4rem 1rem 1rem; }
+.dscroll::-webkit-scrollbar { width: 0; }
+.hero { height: 7rem; border-radius: 0.55rem; background: var(--card-2); display: flex; align-items: center; justify-content: center; color: #7a7a7a; margin-bottom: 0.8rem; }
+.hero .ico { width: 3.2rem; height: 3.2rem; stroke-width: 1.4; }
+.dscroll h2 { font-size: 1.15rem; font-weight: 500; }
+.sub { font-size: 0.76rem; color: var(--muted); margin: 0.15rem 0 0.4rem; }
+.row { background: var(--card); border-radius: 0.55rem; padding: 0.65rem 0.7rem; margin-top: 0.5rem; display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.8rem; }
+.row .ico { color: var(--accent); flex: none; margin-top: 0.05rem; }
+.row span { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+.bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem; }
+.bar { background: var(--card); border-radius: 0.55rem; padding: 0.55rem 0.6rem; }
+.bar small { display: block; font-size: 0.66rem; color: var(--muted); }
+.bar b { font-size: 0.85rem; font-weight: 500; }
+.trk { height: 0.28rem; border-radius: 0.28rem; background: #333; margin-top: 0.35rem; }
+.trk div { height: 100%; border-radius: 0.28rem; background: var(--accent); }
+.btn { margin-top: 0.7rem; background: var(--accent); color: var(--bg); text-align: center; padding: 0.7rem; border-radius: 0.55rem; font-size: 0.85rem; font-weight: 500; cursor: pointer; }
+.btn.alt { background: var(--card); color: var(--text); margin-top: 0.5rem; font-weight: 400; }
+.btn.off { opacity: 0.4; pointer-events: none; }
+
+.toast { position: absolute; left: 1rem; right: 1rem; bottom: 1.4rem; background: var(--card-2); color: var(--text); border-left: 3px solid var(--accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; font-size: 0.78rem; opacity: 0; transform: translateY(0.6rem); transition: all 0.2s ease; pointer-events: none; z-index: 10; }
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+    <div class="hd">
+        <div class="logo" id="logo"></div>
+        <div class="t"><b data-i18n="title"></b><small data-i18n="subtitle"></small></div>
+    </div>
+    <label class="search"><span id="searchIcon"></span><input id="search" type="text" data-i18n-placeholder="search" autocomplete="off"></label>
+    <div class="tabs" id="tabs">
+        <div class="tab on" data-tab="all" data-i18n="tabAll"></div>
+        <div class="tab" data-tab="fav" data-i18n="tabFav"></div>
+        <div class="tab" data-tab="impound" data-i18n="tabImpound"></div>
+    </div>
+    <div class="list" id="list"></div>
+
+    <div class="detail" id="detail">
+        <div class="back" id="back"></div>
+        <div class="dscroll" id="dscroll"></div>
+    </div>
+    <div class="toast" id="toast"></div>
+</div>
+
+<script src="locales/de.js"></script>
+<script src="locales/en.js"></script>
+<script>
+"use strict";
+
+const ICONS = {
+    car: '<path d="M5 17a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M15 17a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5"/>',
+    garage: '<path d="M3 21v-13l9 -4l9 4v13"/><path d="M13 13h4v8h-4z"/><path d="M7 13h4v8h-4z"/><path d="M7 17h4"/>',
+    star: '<path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/>',
+    pin: '<path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>',
+    lock: '<path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M8 11v-4a4 4 0 1 1 8 0v4"/>',
+    back: '<path d="M15 6l-6 6l6 6"/>',
+    search: '<path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/>',
+    info: '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/>'
+};
+
+const LOCALES = window.LOCALES || {};
+
+const REFRESH_MS = 3000;
+
+const state = { vehicles: [], tab: "all", query: "", selected: null, loading: false, lang: "de", setting: "de", snapshot: "" };
+
+const $ = (id) => document.getElementById(id);
+const icon = (name) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+
+function t(key, ...args) {
+    const text = (LOCALES[state.lang] && LOCALES[state.lang][key]) || LOCALES.de[key] || key;
+
+    return args.reduce((result, value, index) => result.replace(`{${index}}`, value), text);
+}
+
+function statusLabel(status) {
+    return t({ garage: "statusGarage", outside: "statusOutside", impound: "statusImpound" }[status]);
+}
+
+function resolveLanguage() {
+    const wanted = state.setting === "auto"
+        ? String((typeof settings !== "undefined" && settings && settings.locale) || navigator.language || "de").slice(0, 2).toLowerCase()
+        : state.setting;
+
+    state.lang = LOCALES[wanted] ? wanted : "de";
+}
+
+function applyLocale() {
+    resolveLanguage();
+    document.documentElement.lang = state.lang;
+    document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
+    $("back").querySelector("span").textContent = t("back");
+    renderList();
+
+    if (state.selected) renderDetail();
+}
+
+function nui(event, data) {
+    if (typeof fetchNui === "function") {
+        return fetchNui(event, data);
+    }
+
+    const resource = typeof resourceName !== "undefined" ? resourceName : GetParentResourceName();
+
+    return fetch(`https://${resource}/${event}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=UTF-8" },
+        body: JSON.stringify(data || {})
+    }).then((response) => response.json());
+}
+
+function el(tag, className, text) {
+    const node = document.createElement(tag);
+
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = text;
+
+    return node;
+}
+
+function withIcon(node, name) {
+    node.insertAdjacentHTML("afterbegin", icon(name));
+
+    return node;
+}
+
+function toast(message) {
+    const node = $("toast");
+
+    node.textContent = message;
+    node.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => node.classList.remove("show"), 2200);
+}
+
+function formatMoney(value) {
+    return new Intl.NumberFormat(t("tag"), { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
+}
+
+function formatDate(seconds) {
+    return new Date(seconds * 1000).toLocaleString(t("tag"), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+function title(vehicle) {
+    return vehicle.nickname || vehicle.label || vehicle.plate;
+}
+
+function where(vehicle) {
+    if (vehicle.status === "impound") return vehicle.garage || t("statusImpound");
+    if (vehicle.status === "outside") return vehicle.garage ? t("lastSeen", vehicle.garage) : t("unknown");
+
+    return vehicle.garage || t("unknown");
+}
+
+function visibleVehicles() {
+    const query = state.query.trim().toLowerCase();
+
+    return state.vehicles
+        .filter((vehicle) => {
+            if (state.tab === "fav" && !vehicle.favorite) return false;
+            if (state.tab === "impound" && vehicle.status !== "impound") return false;
+            if (!query) return true;
+
+            return [vehicle.label, vehicle.nickname, vehicle.plate, vehicle.garage]
+                .some((value) => value && String(value).toLowerCase().includes(query));
+        })
+        .sort((a, b) => Number(b.favorite) - Number(a.favorite) || title(a).localeCompare(title(b), t("tag")));
+}
+
+function renderList() {
+    const list = $("list");
+    const scroll = list.scrollTop;
+    const vehicles = visibleVehicles();
+
+    list.replaceChildren();
+
+    if (!vehicles.length) {
+        const messages = { all: t("emptyAll"), fav: t("emptyFav"), impound: t("emptyImpound") };
+
+        list.appendChild(el("div", "empty", state.query ? t("emptySearch") : messages[state.tab]));
+
+        return;
+    }
+
+    for (const vehicle of vehicles) {
+        const card = el("div", "car");
+        const thumb = withIcon(el("div", "thumb"), "car");
+        const info = el("div", "info");
+        const star = withIcon(el("div", "star" + (vehicle.favorite ? " on" : "")), "star");
+
+        info.append(el("b", "", title(vehicle)), el("small", "", `${vehicle.plate} · ${where(vehicle)}`), el("span", `chip ${vehicle.status}`, statusLabel(vehicle.status)));
+        card.append(thumb, info, star);
+
+        star.addEventListener("click", (event) => {
+            event.stopPropagation();
+            toggleFavorite(vehicle);
+        });
+        card.addEventListener("click", () => openDetail(vehicle.plate));
+        list.appendChild(card);
+    }
+
+    list.scrollTop = scroll;
+}
+
+function bar(label, value) {
+    const box = el("div", "bar");
+    const track = el("div", "trk");
+    const fill = el("div");
+
+    fill.style.width = `${value}%`;
+    track.appendChild(fill);
+    box.append(el("small", "", label), el("b", "", `${value} %`), track);
+
+    return box;
+}
+
+function infoRow(iconName, text, sub) {
+    const row = withIcon(el("div", "row"), iconName);
+    const body = el("div", "", text);
+
+    if (sub) body.appendChild(el("span", "", sub));
+    row.appendChild(body);
+
+    return row;
+}
+
+function renderDetail() {
+    const vehicle = state.vehicles.find((entry) => entry.plate === state.selected);
+    const box = $("dscroll");
+    const scroll = box.scrollTop;
+
+    box.replaceChildren();
+
+    if (!vehicle) return;
+
+    box.appendChild(withIcon(el("div", "hero"), "car"));
+    box.appendChild(el("h2", "", title(vehicle)));
+    box.appendChild(el("div", "sub", `${vehicle.nickname ? vehicle.label + " · " : ""}${vehicle.plate}`));
+    box.appendChild(el("span", `chip ${vehicle.status}`, statusLabel(vehicle.status)));
+
+    if (vehicle.status === "garage") {
+        box.appendChild(infoRow("garage", vehicle.garage || t("unknown"), t("inGarageSub")));
+    } else if (vehicle.status === "outside") {
+        box.appendChild(infoRow("pin", vehicle.garage ? t("lastIn", vehicle.garage) : t("locationUnknown"), t("outsideSub")));
+    } else {
+        const data = vehicle.impound || {};
+
+        box.appendChild(infoRow("lock", t("impoundAt", vehicle.garage || "").trim(), data.retrievable ? t("canCollect") : t("contactPolice")));
+
+        if (data.reason) box.appendChild(infoRow("info", t("reason"), data.reason));
+        if (data.by) box.appendChild(infoRow("info", t("impoundedBy"), String(data.by)));
+        if (data.cost) box.appendChild(infoRow("info", t("cost"), formatMoney(data.cost)));
+        if (data.availableAt) {
+            const later = data.availableAt * 1000 > Date.now();
+
+            box.appendChild(infoRow("info", later ? t("availableFrom") : t("available"), later ? formatDate(data.availableAt) : t("immediately")));
+        }
+    }
+
+    const bars = el("div", "bars");
+
+    bars.append(bar(t("fuel"), vehicle.fuel), bar(t("engine"), vehicle.engine), bar(t("body"), vehicle.body));
+    box.appendChild(bars);
+
+    const waypoint = el("div", "btn" + (vehicle.location ? "" : " off"), vehicle.status === "impound" ? t("waypointImpound") : t("waypointGarage"));
+
+    waypoint.addEventListener("click", async () => {
+        if (!vehicle.location) return;
+
+        const done = await nui("setWaypoint", { x: vehicle.location.x, y: vehicle.location.y });
+
+        toast(done ? t("waypointSet") : t("waypointFailed"));
+    });
+
+    const favorite = el("div", "btn alt", vehicle.favorite ? t("removeFav") : t("addFav"));
+
+    favorite.addEventListener("click", () => toggleFavorite(vehicle));
+    box.append(waypoint, favorite);
+
+    if (!vehicle.location) {
+        box.appendChild(el("div", "sub", t("noLocation")));
+    }
+
+    box.scrollTop = scroll;
+}
+
+function openDetail(plate) {
+    state.selected = plate;
+    renderDetail();
+    $("detail").classList.add("open");
+}
+
+function closeDetail() {
+    $("detail").classList.remove("open");
+    state.selected = null;
+}
+
+async function toggleFavorite(vehicle) {
+    const result = await nui("toggleFavorite", { plate: vehicle.plate });
+
+    if (typeof result !== "boolean") {
+        toast(t("failed"));
+
+        return;
+    }
+
+    vehicle.favorite = result;
+    state.snapshot = JSON.stringify(state.vehicles);
+    renderList();
+
+    if (state.selected === vehicle.plate) renderDetail();
+}
+
+async function load(silent) {
+    if (state.loading) return;
+
+    state.loading = true;
+
+    try {
+        const vehicles = await nui("getVehicles");
+        const next = Array.isArray(vehicles) ? vehicles : [];
+        const snapshot = JSON.stringify(next);
+
+        // only redraw when something changed, so scrolling and taps are not interrupted
+        if (snapshot !== state.snapshot) {
+            state.vehicles = next;
+            state.snapshot = snapshot;
+            renderList();
+
+            if (state.selected) renderDetail();
+        }
+    } catch (error) {
+        if (!silent) toast(t("loadFailed"));
+    }
+
+    state.loading = false;
+}
+
+$("logo").innerHTML = icon("garage");
+$("searchIcon").innerHTML = icon("search");
+$("back").innerHTML = icon("back") + "<span></span>";
+$("back").addEventListener("click", closeDetail);
+$("search").addEventListener("input", (event) => {
+    state.query = event.target.value;
+    renderList();
+});
+$("tabs").addEventListener("click", (event) => {
+    const tab = event.target.closest(".tab");
+
+    if (!tab) return;
+
+    state.tab = tab.dataset.tab;
+    document.querySelectorAll(".tab").forEach((node) => node.classList.toggle("on", node === tab));
+    renderList();
+});
+
+async function start() {
+    try {
+        const config = await nui("getConfig");
+
+        if (config && typeof config.locale === "string") state.setting = config.locale.toLowerCase();
+    } catch (error) {
+        // keep the default language
+    }
+
+    applyLocale();
+    await load(false);
+
+    // keep the list up to date while the app is open: poll every few seconds, and right away when the app is shown again
+    const tick = async () => {
+        if (!document.hidden) await load(true);
+
+        setTimeout(tick, REFRESH_MS);
+    };
+
+    setTimeout(tick, REFRESH_MS);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) load(true); });
+    window.addEventListener("focus", () => load(true));
+
+    if (typeof onSettingsChange === "function") {
+        onSettingsChange(() => { if (state.setting === "auto") applyLocale(); });
+    }
+}
+
+start();
+</script>
+</body>
+</html>
