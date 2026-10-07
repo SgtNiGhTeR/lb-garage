@@ -1,5 +1,3 @@
-local ESX = exports["es_extended"]:getSharedObject()
-
 local locations = { garages = {}, impounds = {} }
 
 MySQL.ready(function()
@@ -10,6 +8,38 @@ MySQL.ready(function()
             PRIMARY KEY (`identifier`, `plate`)
         )
     ]])
+
+    if not Bridge.name then
+        return
+    end
+
+    -- Warn early if the JG Advanced Garages columns are missing from the vehicles table
+    local required = {
+        "plate", Bridge.ownerColumn, "vehicle", "in_garage", "garage_id", "impound", "impound_retrievable",
+        "impound_data", "nickname", "fuel", "engine", "body", "job_vehicle", "gang_vehicle",
+    }
+
+    local existing = {}
+
+    for _, row in ipairs(MySQL.query.await([[
+        SELECT COLUMN_NAME AS name FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+    ]], { Bridge.vehiclesTable }) or {}) do
+        existing[row.name] = true
+    end
+
+    local missing = {}
+
+    for _, column in ipairs(required) do
+        if not existing[column] then
+            missing[#missing + 1] = column
+        end
+    end
+
+    if #missing > 0 then
+        print(("^1[lb-garageapp]^7 Table `%s` is missing columns: %s. Is jg-advancedgarages installed for %s?"):format(
+            Bridge.vehiclesTable, table.concat(missing, ", "), Bridge.name))
+    end
 end)
 
 ---Reads the garage and impound locations from the config of the garage resource.
@@ -78,19 +108,17 @@ local function percent(value, divisor)
 end
 
 lib.callback.register("lb-garageapp:getVehicles", function(source)
-    local xPlayer = ESX.GetPlayerFromId(source)
+    local identifier = Bridge.name and Bridge.GetIdentifier(source)
 
-    if not xPlayer then
+    if not identifier then
         return {}
     end
 
-    local identifier = xPlayer.identifier
-
     local rows = MySQL.query.await(([[
-        SELECT plate, JSON_VALUE(vehicle, '$.model') AS model, in_garage, garage_id, impound, impound_retrievable, impound_data, nickname, fuel, engine, body
+        SELECT plate, %s AS model, in_garage, garage_id, impound, impound_retrievable, impound_data, nickname, fuel, engine, body
         FROM `%s`
-        WHERE owner = ? AND job_vehicle = 0 AND gang_vehicle = 0
-    ]]):format(Config.VehiclesTable), { identifier }) or {}
+        WHERE `%s` = ? AND job_vehicle = 0 AND gang_vehicle = 0
+    ]]):format(Bridge.modelColumn, Bridge.vehiclesTable, Bridge.ownerColumn), { identifier }) or {}
 
     local favorites = {}
 
@@ -145,6 +173,7 @@ lib.callback.register("lb-garageapp:getVehicles", function(source)
         vehicles[#vehicles + 1] = {
             plate = row.plate,
             model = tonumber(row.model) or row.model,
+            label = Bridge.GetVehicleLabel(row.model),
             nickname = row.nickname ~= "" and row.nickname or nil,
             status = status,
             garage = row.garage_id,
@@ -161,16 +190,14 @@ lib.callback.register("lb-garageapp:getVehicles", function(source)
 end)
 
 lib.callback.register("lb-garageapp:toggleFavorite", function(source, plate)
-    local xPlayer = ESX.GetPlayerFromId(source)
+    local identifier = Bridge.name and Bridge.GetIdentifier(source)
 
-    if not xPlayer or type(plate) ~= "string" or #plate == 0 or #plate > 12 then
+    if not identifier or type(plate) ~= "string" or #plate == 0 or #plate > 12 then
         return nil
     end
 
-    local identifier = xPlayer.identifier
-
     -- only the owner may favorite a vehicle
-    local owned = MySQL.scalar.await(("SELECT 1 FROM `%s` WHERE owner = ? AND plate = ? LIMIT 1"):format(Config.VehiclesTable), { identifier, plate })
+    local owned = MySQL.scalar.await(("SELECT 1 FROM `%s` WHERE `%s` = ? AND plate = ? LIMIT 1"):format(Bridge.vehiclesTable, Bridge.ownerColumn), { identifier, plate })
 
     if not owned then
         return nil

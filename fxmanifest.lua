@@ -3,8 +3,8 @@ game "gta5"
 lua54 "yes"
 
 author "SgtNiGhTeR"
-description "Garage / Fuhrpark app for LB Phone (JG Advanced Garages)"
-version "1.1.0"
+description "Garage / Fuhrpark app for LB Phone (JG Advanced Garages, ESX & Qbox)"
+version "1.2.0"
 
 dependencies {
     "oxmysql",
@@ -24,6 +24,7 @@ client_scripts {
 
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
+    "bridge/server.lua",
     "server.lua",
 }
 
